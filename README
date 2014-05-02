@@ -1,0 +1,18 @@
+
+OPENGL STARTER KIT (with GLEE)
+by: Eric Alan Bischoff
+
+This is a starter kit for opengl.
+It contains all the necisary setup for a opengl starter project.
+This includes glfw, glew, and a simple c library called glee.
+
+ABOUT GLEE
+
+glee is a simple library of c functions to do the following:
+
+-Read files
+-Update the framerate
+-Timing
+-Log Information
+-Log Shader Compilation
+
