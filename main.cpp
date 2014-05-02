@@ -2,40 +2,39 @@
 #include <GLFW/glfw3.h>
 #include "glee.h" //Custom C Library
 
-int main () {
-  gleeLogStart();
-  if (!glfwInit ()) {
-    fprintf (stderr, "ERROR: could not start GLFW3\n");
+int main() {
+  if (!glfwInit()) {
+    fprintf(stderr, "ERROR: could not start GLFW3\n");
     return 1;
   } 
 
   // uncomment these lines if on Apple OS X
-  glfwWindowHint (GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint (GLFW_CONTEXT_VERSION_MINOR, 2);
-  glfwWindowHint (GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-  glfwWindowHint (GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint (GLFW_SAMPLES, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_SAMPLES, 4);
 
   //GLFWmonitor* mon = glfwGetPrimaryMonitor();
   //const GLFWvidmode* vmode = glfwGetVideoMode(mon);
-  //GLFWwindow* window = glfwCreateWindow (vmode->width, vmode->height, "Hello Triangle", mon, NULL);
-  GLFWwindow* window = glfwCreateWindow (1080, 720, "Hello Triangle", NULL, NULL);
+  //GLFWwindow* window = glfwCreateWindow(vmode->width, vmode->height, "Hello Triangle", mon, NULL);
+  GLFWwindow* window = glfwCreateWindow(1080, 720, "Hello Triangle", NULL, NULL);
   if (!window) {
-    fprintf (stderr, "ERROR: could not open window with GLFW3\n");
+    fprintf(stderr, "ERROR: could not open window with GLFW3\n");
     glfwTerminate();
     return 1;
   }
-  glfwMakeContextCurrent (window);
+  glfwMakeContextCurrent(window);
                                   
   //start GLEW
   glewExperimental = GL_TRUE;
-  glewInit ();
+  glewInit();
 
   //get version info
-  const GLubyte* renderer = glGetString (GL_RENDERER); // get renderer string
-  const GLubyte* version = glGetString (GL_VERSION); // version as a string
-  printf ("Renderer: %s\n", renderer);
-  printf ("OpenGL version supported %s\n", version);
+  const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
+  const GLubyte* version = glGetString(GL_VERSION); // version as a string
+  printf("Renderer: %s\n", renderer);
+  printf("OpenGL version supported %s\n", version);
 
   //tell GL to only draw onto a pixel if the shape is closer to the viewer
   glEnable(GL_DEPTH_TEST); // enable depth-testing
@@ -51,16 +50,16 @@ int main () {
   };
 
   GLuint vbo;
-  glGenBuffers (1, &vbo);
-  glBindBuffer (GL_ARRAY_BUFFER, vbo);
-  glBufferData (GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+  glGenBuffers(1, &vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
 
   GLuint vao;
-  glGenVertexArrays (1, &vao);
-  glBindVertexArray (vao);
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
   glEnableVertexAttribArray(0);
-  glBindBuffer (GL_ARRAY_BUFFER, vbo);
-  glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
   const char*  vertex_shader = gleeReadFile("./shader.vert.glsl");
   const char* fragment_shader = gleeReadFile("./shader.frag.glsl");
@@ -68,26 +67,32 @@ int main () {
   GLuint vs = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vs, 1, &vertex_shader, NULL);
   glCompileShader(vs);
+  gleeLogShader(vs);
   GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fs, 1, &fragment_shader, NULL);
   glCompileShader(fs);
+  gleeLogShader(fs);
 
-  GLuint shader_program = glCreateProgram();
-  glAttachShader(shader_program, fs);
-  glAttachShader(shader_program, vs);
-  glLinkProgram(shader_program);
+  GLuint program = glCreateProgram();
+  glAttachShader(program, fs);
+  glAttachShader(program, vs);
+  glLinkProgram(program);
+  gleeLogLinking(program);
 
-  while (!glfwWindowShouldClose (window)) {
+  //Log Shader Compilation
+  gleeLogProgram(program);
+
+  while (!glfwWindowShouldClose(window)) {
     gleeUpdateFpsCounter(window);
     glClearColor(0.1, 0.1, 0.1, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glUseProgram(shader_program);
+    glUseProgram(program);
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glfwPollEvents();
     glfwSwapBuffers(window);
-    if (GLFW_PRESS == glfwGetKey (window, GLFW_KEY_ESCAPE)) {
-      glfwSetWindowShouldClose (window, 1);
+    if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE)) {
+      glfwSetWindowShouldClose(window, 1);
     }
   }
   // close GL context and any other GLFW resources

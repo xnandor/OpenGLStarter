@@ -14,9 +14,16 @@
 #include <time.h>
 #include <stdarg.h>
 
+//General
 const char* gleeReadFile(const char*);
 void gleeUpdateFpsCounter(GLFWwindow*);
-bool gleeLogStart();
-bool gleeLog(const char*, ...);
-bool gleeLogErr(const char*, ...);
+
+//Log
+void gleeLog(const char*);
+void gleeLogShader(GLuint);
+void gleeLogProgram(GLuint);
+void gleeLogLinking(GLuint);
+
+//Utility
+const char* gleeGLTypeToString (GLenum);
 

@@ -30,5 +30,5 @@ glee.o:glee.cpp glee.h
 clean:
 	rm $(TARGET)
 	rm *.o
-	rm *.log
+
 
