@@ -1,13 +1,9 @@
-#include <GL/glew.h> // include GLEW and new version of GL on Windows
-#include <GLFW/glfw3.h> // GLFW helper library
-#include <stdio.h>
-#include <math.h>
-#define pi 3.14159
-
-char* readFile(char*);
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include "glee.h" //Custom C Library
 
 int main () {
-  // start GL context and O/S window using the GLFW helper library
+  gleeLogStart();
   if (!glfwInit ()) {
     fprintf (stderr, "ERROR: could not start GLFW3\n");
     return 1;
@@ -18,7 +14,11 @@ int main () {
   glfwWindowHint (GLFW_CONTEXT_VERSION_MINOR, 2);
   glfwWindowHint (GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
   glfwWindowHint (GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint (GLFW_SAMPLES, 4);
 
+  //GLFWmonitor* mon = glfwGetPrimaryMonitor();
+  //const GLFWvidmode* vmode = glfwGetVideoMode(mon);
+  //GLFWwindow* window = glfwCreateWindow (vmode->width, vmode->height, "Hello Triangle", mon, NULL);
   GLFWwindow* window = glfwCreateWindow (1080, 720, "Hello Triangle", NULL, NULL);
   if (!window) {
     fprintf (stderr, "ERROR: could not open window with GLFW3\n");
@@ -27,21 +27,20 @@ int main () {
   }
   glfwMakeContextCurrent (window);
                                   
-  // start GLEW extension handler
+  //start GLEW
   glewExperimental = GL_TRUE;
   glewInit ();
 
-  // get version info
+  //get version info
   const GLubyte* renderer = glGetString (GL_RENDERER); // get renderer string
   const GLubyte* version = glGetString (GL_VERSION); // version as a string
   printf ("Renderer: %s\n", renderer);
   printf ("OpenGL version supported %s\n", version);
 
-  // tell GL to only draw onto a pixel if the shape is closer to the viewer
+  //tell GL to only draw onto a pixel if the shape is closer to the viewer
   glEnable(GL_DEPTH_TEST); // enable depth-testing
   glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
 
-  /* OTHER STUFF GOES HERE NEXT */
   GLfloat points[] = {
     -0.9f,  0.9f,  0.0f,
      0.0f, -0.9f,  0.0f,
@@ -63,8 +62,8 @@ int main () {
   glBindBuffer (GL_ARRAY_BUFFER, vbo);
   glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
-  const char* vertex_shader = readFile("./shader.vert.glsl");
-  const char* fragment_shader = readFile("./shader.frag.glsl");
+  const char*  vertex_shader = gleeReadFile("./shader.vert.glsl");
+  const char* fragment_shader = gleeReadFile("./shader.frag.glsl");
 
   GLuint vs = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vs, 1, &vertex_shader, NULL);
@@ -73,41 +72,26 @@ int main () {
   glShaderSource(fs, 1, &fragment_shader, NULL);
   glCompileShader(fs);
 
-  GLuint shader_program = glCreateProgram ();
+  GLuint shader_program = glCreateProgram();
   glAttachShader(shader_program, fs);
   glAttachShader(shader_program, vs);
   glLinkProgram(shader_program);
 
   while (!glfwWindowShouldClose (window)) {
-    // wipe the drawing surface clear
+    gleeUpdateFpsCounter(window);
     glClearColor(0.1, 0.1, 0.1, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glUseProgram(shader_program);
     glBindVertexArray(vao);
-    // draw points 0-3 from the currently bound VAO with current in-use shader
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    // update other events like input handling 
     glfwPollEvents();
-    // put the stuff we've been drawing onto the display
     glfwSwapBuffers(window);
+    if (GLFW_PRESS == glfwGetKey (window, GLFW_KEY_ESCAPE)) {
+      glfwSetWindowShouldClose (window, 1);
+    }
   }
-
   // close GL context and any other GLFW resources
   glfwTerminate();
   return 0;
 }
-
-char* readFile(char* filename) {
-  FILE *f = fopen(filename, "rb");
-  fseek(f, 0, SEEK_END);
-  long fsize = ftell(f);
-  fseek(f, 0, SEEK_SET);
-  char* string = new char[fsize + 1];
-  fread(string, fsize, 1, f);
-  fclose(f);
-  string[fsize] = 0;
-  return string;
-}
-
-
 
